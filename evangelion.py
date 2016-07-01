@@ -174,10 +174,12 @@ class Thread:
             if hasattr(self, 'country'):
                 s = 'From {0} with {1} posts in {2} = {3}/min'
                 s_min = '{0}{1}a{2}/m:{3}'
+                s_telegram = '{0}rpm ({1} in {2}): {3}\n\n(from {4})\n\n{5}'
             else:
                 self.country = ''
                 s = 'Thread with {1} posts in {2} = {3}/min'
                 s_min = '{1}a{2}/m:{3}'
+                s_telegram = '{0}rpm ({1} in {2}): {3}\n\n{5}'
             msg_string = s.format(self.country,
                                   self.replies,
                                   self.age_pretty,
@@ -186,6 +188,12 @@ class Thread:
                                           self.replies,
                                           self.rpm,
                                           self.excerpt)
+            msg_string_telegram = s_telegram.format(self.rpm,
+                                                    self.replies,
+                                                    self.age_pretty,
+                                                    self.excerpt,
+                                                    self.country_name,
+                                                    self.url)
             try:
                 pync = TerminalNotifier()
                 pync.notify(self.excerpt,
@@ -195,7 +203,7 @@ class Thread:
                 pass
 
             tb = telegram_bot
-            tb.broadcast(msg_string_min)
+            tb.broadcast(msg_string_telegram)
             pb=pushbullet.Pushbullet('o.NWYoex8JnjUsNf554Aqp8DoiCm2Z07cJ')
             pb.push_link(msg_string_min,
                          self.url)
