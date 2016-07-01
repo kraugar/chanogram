@@ -20,8 +20,6 @@ try:
 except:
     pass
 
-debug = False
-debug_json_file = 'catalog.json'
 logfile = 'evangelion_log.txt'
 telegram_users_file = 'telegram_users.txt'
 
@@ -52,24 +50,13 @@ class Board:
 
 #   @timeout(30, os.strerror(errno.ETIMEDOUT))
     def load_api_file(self, board):
-        global debug
-        global debug_json_file
-        if debug:
-            try:
-                with open(debug_json_file, 'r') as f:
-                    api_file = f.read()
-                print 'Got JSON from local debug file.'
-            except exception.Exception as e:
-                print e, '\nError while attempting to get local debug JSON.'
-                return None
-        else:
-            try:
-                api_file = urlopen('https://a.4cdn.org/{0}/catalog.json'\
-                                   .format(board)).read()
-                print 'Got JSON from online 4chan API.'
-            except exceptions.Exception as e:
-                print e, '\nError while attempting to get 4chan API JSON.'
-                return None
+        try:
+            api_file = urlopen('https://a.4cdn.org/{0}/catalog.json'\
+                               .format(board)).read()
+            print 'Got JSON from online 4chan API.'
+        except exceptions.Exception as e:
+            print e, '\nError while attempting to get 4chan API JSON.'
+            return None
         return api_file
 
     def remove_subjects(self, matches):
@@ -93,21 +80,6 @@ class Board:
             if t.is_read() is False:
                 unread.append(t)
         self.threads = unread
-
-    def print_debug_list(self):
-        print '================\nDEBUG\n==============='
-        for thread in self.threads:
-            if thread.is_read():
-                print '@@@@@@@@@@@@@@@@@@@ read @@@@@@@@@@@@@@@@@@@'
-            if hasattr(thread, 'sub'):
-                print thread.sub.encode('utf8')
-            print '{0}: {1}'.format(thread.rpm,
-                                    thread.content.encode('utf8'))
-            if thread.is_read():
-                print '@@@@@@@@@@@@@@@@@@@ read @@@@@@@@@@@@@@@@@@@'
-            print '--------------------'
-        print '============\nEnd of top threads:\n============'
-
 
 class Thread:
     def __init__(self, board, jsondata):
@@ -301,7 +273,6 @@ class Daemon(threading.Thread):
         self.telegram_bot = TelegramBot(telegram_bot_api_token, 'telegram_subscribers.db')
 
     def run(self):
-        global debug
         while True:
             print 'Daemon running...'
             b = Board(self.board)
@@ -309,9 +280,6 @@ class Daemon(threading.Thread):
                 print 'Error:', b.error
             else:
                 b.remove_subjects(self.remove_subjects_matchlist)
-                if debug:
-                    b.threads = b.threads[:15]
-                    b.print_debug_list()
                 b.remove_read()
                 t = b.threads[0]
 
@@ -325,12 +293,9 @@ class Daemon(threading.Thread):
             print '... Daemon finished at', time.strftime(\
                   '%Y/%m/%d, %H:%M:%S', time.localtime(time.time()))
 
-            if debug:
-                break
-            else:
-                print 'Waiting {0} seconds...'.format(self.interval)
-                time.sleep(self.interval)
-                os.system('clear')
+            print 'Waiting {0} seconds...'.format(self.interval)
+            time.sleep(self.interval)
+            os.system('clear')
 
 
 d = Daemon(interval=30)
