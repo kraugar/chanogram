@@ -102,7 +102,7 @@ class Board:
             if hasattr(thread, 'sub'):
                 print thread.sub.encode('utf8')
             print '{0}: {1}'.format(thread.rpm,
-                                    thread.excerpt.encode('utf8'))
+                                    thread.content.encode('utf8'))
             if thread.is_read():
                 print '@@@@@@@@@@@@@@@@@@@ read @@@@@@@@@@@@@@@@@@@'
             print '--------------------'
@@ -115,22 +115,22 @@ class Thread:
         self.board = board
         self.url = 'http://boards.4chan.org/{0}/thread/{1}'\
              .format(board, self.no)
-        self.set_excerpt()
+        self.set_content()
         self.set_times()
 
-    def set_excerpt(self):
-        self.excerpt = 'No excerpt available'
+    def set_content(self):
+        self.content = 'No content available'
         if hasattr(self, 'name'):
-            self.excerpt = self.name
+            self.content = self.name
         if hasattr(self, 'sub'):
-            self.excerpt = self.sub
+            self.content = self.sub
         if hasattr(self, 'com'):
-            self.excerpt = self.com
+            self.content = self.com
 
-        s = BeautifulSoup(self.excerpt).getText()
+        s = BeautifulSoup(self.content).getText()
         pars = HTMLParser.HTMLParser()
         s = pars.unescape(s)
-        self.excerpt = s
+        self.content = s
 
     def set_times(self):
         self.age_seconds = (datetime.now()\
@@ -169,7 +169,7 @@ class Thread:
 
     def notify(self, telegram_bot):
         if self.is_read():
-            print 'Already notified, not notifying again:', self.excerpt
+            print 'Already notified, not notifying again:', self.content
         else:
             if hasattr(self, 'country'):
                 s = 'From {0} with {1} posts in {2} = {3}/min'
@@ -183,20 +183,20 @@ class Thread:
             msg_string = s.format(self.country,
                                   self.replies,
                                   self.age_pretty,
-                                  self.rpm[:200])
+                                  self.rpm)
             msg_string_min = s_min.format(self.country,
                                           self.replies,
                                           self.rpm,
-                                          self.excerpt[:40])
+                                          self.content)
             msg_string_telegram = s_telegram.format(self.rpm,
                                                     self.replies,
                                                     self.age_pretty,
-                                                    self.excerpt,
+                                                    self.content,
                                                     self.country_name,
                                                     self.url)
             try:
                 pync = TerminalNotifier()
-                pync.notify(self.excerpt,
+                pync.notify(self.content,
                             title=msg_string,
                             open=self.url)
             except:
@@ -316,7 +316,7 @@ class Daemon(threading.Thread):
                 else:
                     percentage = "%.1f" % (t.rpm * 100 / self.min_rpm)
                     print 'No hot threads, closest @ {0}/min ({1}%): {2}'\
-                          .format(t.rpm, percentage, t.excerpt[:60])
+                          .format(t.rpm, percentage, t.content[:60])
 
             print '... Daemon finished at', time.strftime(\
                   '%Y/%m/%d, %H:%M:%S', time.localtime(time.time()))
