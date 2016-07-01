@@ -22,7 +22,7 @@ except:
 
 debug = False
 debug_json_file = 'catalog.json'
-logfile = 'evangelus_log.txt'
+logfile = 'evangelion_log.txt'
 telegram_users_file = 'telegram_users.txt'
 
 class Board:
