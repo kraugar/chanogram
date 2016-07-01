@@ -13,7 +13,7 @@ from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from urllib2 import urlopen
 
-logfile = 'evangelion_log.txt'
+logfile = 'chanogram_log.txt'
 
 class Board:
     def __init__(self, board, order='rpm', reverse=True):
@@ -138,41 +138,19 @@ class Thread:
             print 'Already notified, not notifying again:', self.content
         else:
             if hasattr(self, 'country'):
-                s = 'From {0} with {1} posts in {2} = {3}/min'
-                s_min = '{0}{1}a{2}/m:{3}'
-                s_telegram = '{0}rpm ({1} in {2}): {3}\n\n(from {4})\n\n{5}'
+                s = '{0}rpm ({1} in {2}): {3}\n\n(from {4})\n\n{5}'
             else:
                 self.country = ''
-                s = 'Thread with {1} posts in {2} = {3}/min'
-                s_min = '{1}a{2}/m:{3}'
-                s_telegram = '{0}rpm ({1} in {2}): {3}\n\n{5}'
-            msg_string = s.format(self.country,
+                s = '{0}rpm ({1} in {2}): {3}\n\n{5}'
+            s = s_telegram.format(self.rpm,
                                   self.replies,
                                   self.age_pretty,
-                                  self.rpm)
-            msg_string_min = s_min.format(self.country,
-                                          self.replies,
-                                          self.rpm,
-                                          self.content)
-            msg_string_telegram = s_telegram.format(self.rpm,
-                                                    self.replies,
-                                                    self.age_pretty,
-                                                    self.content,
-                                                    self.country_name,
-                                                    self.url)
-            try:
-                pync = TerminalNotifier()
-                pync.notify(self.content,
-                            title=msg_string,
-                            open=self.url)
-            except:
-                pass
+                                  self.content,
+                                  self.country_name,
+                                  self.url)
 
             tb = telegram_bot
-            tb.broadcast(msg_string_telegram)
-            pb=pushbullet.Pushbullet('o.NWYoex8JnjUsNf554Aqp8DoiCm2Z07cJ')
-            pb.push_link(msg_string_min,
-                         self.url)
+            tb.broadcast(s)
 
             self.mark_read()
 
@@ -246,8 +224,9 @@ class TelegramBot():
             self.bot.sendMessage(sub, msg)
 
 
-class Daemon(threading.Thread):
+class Chanogram(threading.Thread):
     def __init__(self,
+                 db_file = 'chanogram.db',
                  board='pol',
                  remove_subjects_matchlist=['edition',],
                  min_replies=0,
@@ -292,5 +271,5 @@ class Daemon(threading.Thread):
             os.system('clear')
 
 
-d = Daemon(interval=30)
-d.start()
+c = Chanogram(interval=30)
+c.start()
