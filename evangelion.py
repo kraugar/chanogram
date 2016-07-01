@@ -125,7 +125,7 @@ class Thread:
         if hasattr(self, 'sub'):
             self.excerpt = self.sub
         if hasattr(self, 'com'):
-            self.excerpt = self.com[:140]
+            self.excerpt = self.com[:200]
 
         s = BeautifulSoup(self.excerpt).getText()
         pars = HTMLParser.HTMLParser()
@@ -195,7 +195,7 @@ class Thread:
                 pass
 
             tb = telegram_bot
-            tb.broadcast(msg_string)
+            tb.broadcast(msg_string_min)
             pb=pushbullet.Pushbullet('o.NWYoex8JnjUsNf554Aqp8DoiCm2Z07cJ')
             pb.push_link(msg_string_min,
                          self.url)
