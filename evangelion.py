@@ -4,13 +4,16 @@ import errno
 import exceptions
 import json
 import os.path
+import sqlite3
 import pushbullet
+import telepot
 import threading
 import time
 import sys
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from urllib2 import urlopen
+from pprint import pprint
 try:
     import pync
     from pync.TerminalNotifier import TerminalNotifier
@@ -20,6 +23,7 @@ except:
 debug = False
 debug_json_file = 'catalog.json'
 logfile = 'evangelus_log.txt'
+telegram_users_file = 'telegram_users.txt'
 
 class Board:
     def __init__(self, board, order='rpm', reverse=True):
@@ -163,7 +167,7 @@ class Thread:
             f.write(str(self.no) + '\n')
             print 'Marked as notified:', self.no
 
-    def notify(self):
+    def notify(self, telegram_bot):
         if self.is_read():
             print 'Already notified, not notifying again:', self.excerpt
         else:
@@ -190,11 +194,79 @@ class Thread:
             except:
                 pass
 
+            tb = telegram_bot
+            tb.broadcast(msg_string)
             pb=pushbullet.Pushbullet('o.NWYoex8JnjUsNf554Aqp8DoiCm2Z07cJ')
             pb.push_link(msg_string_min,
                          self.url)
 
             self.mark_read()
+
+
+class TelegramChannelBot():
+    def __init__(self, api_token, db_file):
+        self.api_token = api_token
+        self.db_file = db_file
+        self.bot = telepot.Bot(self.api_token)
+        self.bot.message_loop(self.handle)
+
+        self.init_db()
+
+        print 'TelegramChannelBot init complete.'
+
+    def init_db(self):
+        self.conn = sqlite3.connect(self.db_file)
+        self.c = self.conn.cursor()
+        self.c.execute("CREATE TABLE IF NOT EXISTS subscribers (user_id TEXT UNIQUE)")
+        self.conn.commit()
+        self.conn.close()
+
+    def add_subscriber(self, user_id):
+        self.conn = sqlite3.connect(self.db_file)
+        self.c = self.conn.cursor()
+        self.c.execute("INSERT OR IGNORE INTO subscribers VALUES ('{0}')".format(user_id))
+        self.conn.commit()
+        self.conn.close()
+
+    def del_subscriber(self, user_id):
+        self.conn = sqlite3.connect(self.db_file)
+        self.c = self.conn.cursor()
+        self.c.execute("DELETE FROM subscribers WHERE user_id='{0}'".format(user_id))
+        self.conn.commit()
+        self.conn.close()
+
+    def get_subscribers(self):
+        self.conn = sqlite3.connect(self.db_file)
+        self.c = self.conn.cursor()
+        tmp = self.c.execute("SELECT * FROM subscribers")
+        subscribers = []
+        for e in tmp:
+            subscribers.append(e[0])
+        self.conn.close()
+        return subscribers
+
+    def handle(self, msg):
+        from_id = msg['from']['id']
+        text = msg['text']
+        if text == '/start':
+            if str(from_id) in self.get_subscribers():
+                self.bot.sendMessage(from_id, '''You are already subscribed.\nUse /stop if you want to unsubscribe.''')
+            else:
+                self.add_subscriber(from_id)
+                self.bot.sendMessage(from_id, '''You have subscribed to 4chan /pol/ Breaking News.\nYou will receive notifications on threads that attract lots of responses in a short time.\nUse /stop to unsubscribe.''')
+        elif text == '/stop':
+            if str(from_id) in self.get_subscribers():
+                self.del_subscriber(from_id)
+                self.bot.sendMessage(from_id, '''You have unsubscribed.\nUse /start to subscribe again.''')
+            else:
+                self.bot.sendMessage(from_id, '''You are already unsubscribed.\nUse /start if you want to subscribe again.''')
+        else:
+            self.bot.sendMessage(from_id, 'I only know the following commands:\n/start to subscribe\n/stop to unsubscribe.')
+
+    def broadcast(self, msg):
+        subs = self.get_subscribers()
+        for sub in subs:
+            self.bot.sendMessage(sub, msg)
 
 class Daemon(threading.Thread):
     def __init__(self,
@@ -203,12 +275,18 @@ class Daemon(threading.Thread):
                  min_replies=0,
                  min_rpm=2.9,
                  interval=300):
+
         threading.Thread.__init__(self)
+
         self.board = board
         self.remove_subjects_matchlist = remove_subjects_matchlist
         self.min_replies = min_replies
         self.min_rpm = min_rpm
         self.interval = interval
+
+        with open('telegram_bot_api_token', 'r') as f:
+            telegram_bot_api_token = f.read()
+        self.telegram_bot = TelegramChannelBot(telegram_bot_api_token, 'telegram_subscribers.db')
 
     def run(self):
         global debug
@@ -226,7 +304,7 @@ class Daemon(threading.Thread):
                 t = b.threads[0]
 
                 if float(t.replies) > self.min_replies and t.rpm > self.min_rpm:
-                    t.notify()
+                    t.notify(self.telegram_bot)
                 else:
                     percentage = "%.1f" % (t.rpm * 100 / self.min_rpm)
                     print 'No hot threads, closest @ {0}/min ({1}%): {2}'\
