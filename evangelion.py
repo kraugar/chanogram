@@ -211,7 +211,7 @@ class Thread:
             self.mark_read()
 
 
-class TelegramChannelBot():
+class TelegramBot():
     def __init__(self, api_token, db_file):
         self.api_token = api_token
         self.db_file = db_file
@@ -225,21 +225,24 @@ class TelegramChannelBot():
     def init_db(self):
         self.conn = sqlite3.connect(self.db_file)
         self.c = self.conn.cursor()
-        self.c.execute("CREATE TABLE IF NOT EXISTS subscribers (user_id TEXT UNIQUE)")
+        self.c.execute(\
+        "CREATE TABLE IF NOT EXISTS subscribers (user_id TEXT UNIQUE)")
         self.conn.commit()
         self.conn.close()
 
     def add_subscriber(self, user_id):
         self.conn = sqlite3.connect(self.db_file)
         self.c = self.conn.cursor()
-        self.c.execute("INSERT OR IGNORE INTO subscribers VALUES ('{0}')".format(user_id))
+        self.c.execute(\
+        "INSERT OR IGNORE INTO subscribers VALUES ('{0}')".format(user_id))
         self.conn.commit()
         self.conn.close()
 
     def del_subscriber(self, user_id):
         self.conn = sqlite3.connect(self.db_file)
         self.c = self.conn.cursor()
-        self.c.execute("DELETE FROM subscribers WHERE user_id='{0}'".format(user_id))
+        self.c.execute(\
+        "DELETE FROM subscribers WHERE user_id='{0}'".format(user_id))
         self.conn.commit()
         self.conn.close()
 
@@ -276,6 +279,7 @@ class TelegramChannelBot():
         for sub in subs:
             self.bot.sendMessage(sub, msg)
 
+
 class Daemon(threading.Thread):
     def __init__(self,
                  board='pol',
@@ -294,7 +298,7 @@ class Daemon(threading.Thread):
 
         with open('telegram_bot_api_token', 'r') as f:
             telegram_bot_api_token = f.read()
-        self.telegram_bot = TelegramChannelBot(telegram_bot_api_token, 'telegram_subscribers.db')
+        self.telegram_bot = TelegramBot(telegram_bot_api_token, 'telegram_subscribers.db')
 
     def run(self):
         global debug
@@ -327,6 +331,7 @@ class Daemon(threading.Thread):
                 print 'Waiting {0} seconds...'.format(self.interval)
                 time.sleep(self.interval)
                 os.system('clear')
+
 
 d = Daemon(interval=30)
 d.start()
