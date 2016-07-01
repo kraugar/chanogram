@@ -5,7 +5,6 @@ import exceptions
 import json
 import os.path
 import sqlite3
-import pushbullet
 import telepot
 import threading
 import time
@@ -13,15 +12,8 @@ import sys
 from BeautifulSoup import BeautifulSoup
 from datetime import datetime
 from urllib2 import urlopen
-from pprint import pprint
-try:
-    import pync
-    from pync.TerminalNotifier import TerminalNotifier
-except:
-    pass
 
 logfile = 'evangelion_log.txt'
-telegram_users_file = 'telegram_users.txt'
 
 class Board:
     def __init__(self, board, order='rpm', reverse=True):
@@ -30,7 +22,10 @@ class Board:
         self.reverse = reverse
 
         api_file = self.load_api_file(self.board)
-        if api_file:
+        try:
+            api_file = urlopen('https://a.4cdn.org/{0}/catalog.json'\
+                               .format(board)).read()
+            print 'Got JSON from online 4chan API.'
             api_json = json.loads(api_file)
             threads = []
             for page in api_json:
@@ -44,9 +39,8 @@ class Board:
             self.threads = threads
             print 'Board /{0}/ init complete with {1} threads sorted by `{2}`.'\
                 .format(self.board, len(self.threads), self.order)
-        else:
-            print 'Error during board init.'
-            self.error = 'file'
+        except exceptions.Exception as e:
+            print e, '\nError while attempting to get 4chan API JSON.'
 
 #   @timeout(30, os.strerror(errno.ETIMEDOUT))
     def load_api_file(self, board):
@@ -275,10 +269,8 @@ class Daemon(threading.Thread):
     def run(self):
         while True:
             print 'Daemon running...'
-            b = Board(self.board)
-            if hasattr(b, 'error'):
-                print 'Error:', b.error
-            else:
+            try:
+                b = Board(self.board)
                 b.remove_subjects(self.remove_subjects_matchlist)
                 b.remove_read()
                 t = b.threads[0]
@@ -290,8 +282,10 @@ class Daemon(threading.Thread):
                     print 'No hot threads, closest @ {0}/min ({1}%): {2}'\
                           .format(t.rpm, percentage, t.content[:60])
 
-            print '... Daemon finished at', time.strftime(\
+                print '... Daemon finished successfully at', time.strftime(\
                   '%Y/%m/%d, %H:%M:%S', time.localtime(time.time()))
+            except exceptions.Exception as e:
+                print e
 
             print 'Waiting {0} seconds...'.format(self.interval)
             time.sleep(self.interval)
