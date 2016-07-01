@@ -130,7 +130,7 @@ class Thread:
         s = BeautifulSoup(self.content).getText()
         pars = HTMLParser.HTMLParser()
         s = pars.unescape(s)
-        self.content = s
+        self.content = s.encode('utf8')
 
     def set_times(self):
         self.age_seconds = (datetime.now()\
