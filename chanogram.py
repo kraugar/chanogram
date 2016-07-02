@@ -3,6 +3,7 @@ import sqlite3
 import telepot
 import time
 import logging
+import exceptions
 from dateutil.relativedelta import relativedelta
 from BeautifulSoup import BeautifulSoup
 from HTMLParser import HTMLParser
@@ -15,11 +16,14 @@ logging.basicConfig(filename='chanogram.log',
                     format='%(asctime)s %(levelname)s %(message)s')
 
 class Chanogram:
-    def __init__(self, api_token_file = 'api_token.txt', db_file = 'chanogram.db',
+    def __init__(self,
+                 api_token_file = 'api_token.txt',
+                 db_file = 'chanogram.db',
                  settings = {'board': 'pol',
                              'filter_list': ['edition',],
                              'min_replies': 0,
-                             'min_rpm': 0}):
+                             'min_rpm': 3.4}):
+
         logging.debug('Attempting to init Chanogram instance...')
         with open(api_token_file, 'r') as f:
             self.api_token = f.read()
@@ -36,7 +40,6 @@ class Chanogram:
         "CREATE TABLE IF NOT EXISTS broadcast_history (entry TEXT UNIQUE)")
         self.conn.commit()
         self.conn.close()
-        logging.debug('Chanogram database init complete.')
 
         self.settings = settings
         logging.info('Chanogram instance init complete.')
@@ -117,7 +120,7 @@ class Chanogram:
 
 
         else:
-            self.bot.sendMessage(from_id, 'I *only* know the following commands:\n/start _to subscribe_\n/stop _to unsubscribe._', parse_mode='Markdown')
+            self.bot.sendMessage(from_id, 'I *only* know the following commands:\n/start _to subscribe,_\n/stop _to unsubscribe._', parse_mode='Markdown')
         logging.debug('Message handled.')
 
 
@@ -125,7 +128,7 @@ class Chanogram:
         logging.debug('Attempting to broadcast message: "{0}"...'.format(msg[:20]))
         subs = self.list_get('subscribers')
         for sub in subs:
-            self.bot.sendMessage(sub, msg)
+            self.bot.sendMessage(sub, msg, parse_mode='Markdown')
         logging.info('Broadcasted message to {0} subscribers: "{1}".'\
                      .format(len(subs), msg[:20]))
 
@@ -161,26 +164,34 @@ class Chanogram:
                 thread['text'] = s.encode('utf8')
 
                 thread['age_s'] = (datetime.now() -
-                                   datetime.fromtimestamp(thread['time'])).seconds
+                                datetime.fromtimestamp(thread['time'])).seconds
 
                 age = relativedelta(datetime.now(),
                                     datetime.fromtimestamp(thread['time']))
                 if age.hours:
                     if age.minutes > 9:
-                        thread['age_hm'] ='{0}:{1}h'.format(age.hours,age.minutes)
+                        thread['age_hm'] ='{0}:{1}h'\
+                            .format(age.hours, age.minutes)
                     else:
-                        thread['age_hm'] ='{0}:0{1}h'.format(age.hours,age.minutes)
+                        thread['age_hm'] ='{0}:0{1}h'\
+                            .format(age.hours,age.minutes)
                 else:
                     thread['age_hm'] = '{0}min'.format(age.minutes)
 
-                thread['rpm'] = float("%.1f" % (float(thread['replies']) * 60.0 /
+                thread['rpm'] = float("%.1f" % (float(thread['replies']) * 60.0/
                                                 float(thread['age_s'])))
 
                 threads.append(thread)
 
-        threads.sort(key=lambda t: t['rpm'],reverse = True)
-        logging.debug('Loaded and processed {0} threads from /{1}/ board.'\
-            .format(len(threads), self.settings['board']))
+        logging.debug('Attempting to remove read threads...')
+        unread = []
+        read = self.list_get('broadcast_history')
+        for thread in threads:
+            if thread['id'] not in read:
+                unread.append(thread)
+        logging.debug('Removed {0} read threads.'\
+                      .format(len(threads) - len(unread)))
+        threads = unread
 
         logging.debug('Attempting to filter threads...')
         i = 0
@@ -194,9 +205,25 @@ class Chanogram:
             else:
                 i = i + 1
         logging.debug('Filtered out {0} threads.'.format(r))
-        logging.debug('Got {0} threads from board /{1}/ .'\
+
+        threads.sort(key=lambda t: t['rpm'],reverse = True)
+
+        logging.debug('Finally arrived at {0} threads from board /{1}/ .'\
                       .format(len(threads), self.settings['board']))
         return threads
+
+
+    def format_thread(self, thread):
+        logging.debug('Formatting thread...')
+        thread = '*{0}/min ({1}r in {2})*\n{3}\n\n(from {4})\n{5}'\
+                 .format(thread['rpm'],
+                         thread['replies'],
+                         thread['age_hm'],
+                         thread['text'],
+                         thread['country_name'],
+                         thread['url'])
+        logging.debug('Thread formatted.')
+        return thread
 
 
     def run(self):
@@ -208,18 +235,20 @@ class Chanogram:
             if float(t['replies']) > self.settings['min_replies'] and\
                t['rpm'] > self.settings['min_rpm']:
                 if t['id'] not in self.list_get('broadcast_history'):
-                    self.broadcast(str(t['text'])[:200])
+                    formatted_thread = self.format_thread(t)
+                    self.broadcast(formatted_thread)
                     self.list_add('broadcast_history', str(t['id']))
                 else:
                     logging.debug('Already broadcasted message: {0}'\
                                   .format(t['id']))
             else:
-                percentage = "%.1f" % (t['rpm'] * 100 / self.settings['min_rpm'])
-                logging.debug('No hot threads, closest at {0}/min ({1}%): "{2}"'\
-                    .format(t['rpm'], percentage, t['text'][:30]))
+                percentage = "%.1f" % (t['rpm'] * 100 /
+                                       self.settings['min_rpm'])
+                logging.debug('No hot threads, closest at {0}/min ({1}%): "{2}"'.format(t['rpm'], percentage, t['text'][:30]))
             logging.debug('Check operation complete.')
-        except:
-            logging.error('Check operation failed.')
+        except exceptions.Exception as e:
+            print e
+            logging.error('Check operation failed with error: ', e)
 
 
 c = Chanogram()
