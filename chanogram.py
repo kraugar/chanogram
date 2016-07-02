@@ -10,7 +10,7 @@ from datetime import datetime
 from urllib2 import urlopen
 
 logging.basicConfig(filename='chanogram.log',
-                    level=logging.DEBUG,
+                    level=logging.INFO,
                     filemode='w',
                     format='%(asctime)s %(levelname)s %(message)s')
 
@@ -51,7 +51,10 @@ class Chanogram:
         "INSERT OR IGNORE INTO {0} VALUES ('{1}')".format(list_name, entry))
         self.conn.commit()
         self.conn.close()
-        logging.debug('Added {0} to list {1}.'.format(entry, list_name))
+        if list_name == 'subscribers':
+            logging.info('New subscriber with ID {0}'.format(entry))
+        else:
+            logging.debug('Added {0} to list {1}.'.format(entry, list_name))
 
 
     def list_del(self, list_name, entry):
@@ -63,7 +66,10 @@ class Chanogram:
         "DELETE FROM {0} WHERE entry='{1}'".format(list_name, entry))
         self.conn.commit()
         self.conn.close()
-        logging.debug('Deleted {0} from list {1}.'.format(entry, list_name))
+        if list_name == 'subscribers':
+            logging.info('User with ID {0} unsubscribed.'.format(entry))
+        else:
+            logging.debug('Deleted {0} from list {1}.'.format(entry, list_name))
 
 
     def list_get(self, list_name):
