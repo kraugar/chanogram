@@ -216,7 +216,7 @@ _Use_ /start _to subscribe again._''',
             plural_handler = '''Currently there are {0} subscribers:\n{1}'''
         else:
             plural_handler = '''Currently there is one subscriber: {1}'''
-        reply = plural_handler.format(len(subs), '\n-'.join(subs))
+        reply = plural_handler.format(len(subs), '\n'.join(subs))
         self.bot.sendMessage(admin_id, reply, parse_mode='Markdown')
         logging.debug(\
             'Sent subscribers list with {0} entries to admin with ID {1}.'\
