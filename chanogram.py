@@ -93,6 +93,7 @@ class Chanogram:
 
 
     def handle_input(self, msg):
+        global admin_id
         from_id = msg['from']['id']
         text = msg['text']
         logging.debug('Attempting to handle message from {0}: "{1}"...'\
@@ -125,7 +126,7 @@ _Use_ /stop _to unsubscribe._'''\
                         plural_handler,
                         ', '.join(self.settings['filter_list'])),
                 parse_mode='Markdown')
-                logging.info('User {0} subscribed.'.format(from_id))
+                logging.info('User with ID {0} subscribed.'.format(from_id))
 
 
         elif text == '/stop':
@@ -135,7 +136,7 @@ _Use_ /stop _to unsubscribe._'''\
 '''You have *unsubscribed*.
 _Use_ /start _to subscribe again._''',
                                      parse_mode='Markdown')
-                logging.info('User {0} unsubscribed.'.format(from_id))
+                logging.info('User with ID {0} unsubscribed.'.format(from_id))
             else:
                 self.bot.sendMessage(from_id,
 '''You are *already unsubscribed*.
@@ -144,15 +145,17 @@ _Use_ /start _to subscribe again._''',
 
 
         elif text == '/ping':
-            global admin_id
-            if str(from_id) == admin_id:
-                logfile = subprocess.check_output('cat chanogram.log',
-                                                  shell=True)
-                self.bot.sendMessage(admin_id, logfile)
-                logging.info('Sent {0} line logfile to admin {1}.'\
-                             .format(len(logfile.split('\n')), admin_id))
-            else:
                 self.bot.sendMessage(from_id, '''Pong.''')
+
+
+        elif text == '/log' and from_id == admin_id:
+            logtail= subprocess.check_output('tail chanogram.log',
+                                             shell=True)
+            self.bot.sendMessage(admin_id,
+                                 '```{0}```'.format(logtail),
+                                 parse_mode='Markdown')
+            logging.debug('Sent {0} line logtail to admin with ID {1}.'\
+                          .format(len(logtail.split('\n')), admin_id))
 
 
         else:
