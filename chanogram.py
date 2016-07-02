@@ -26,7 +26,7 @@ class Chanogram:
                  settings = {'board': 'pol',
                              'filter_list': ['edition',],
                              'min_replies': 0,
-                             'min_rpm': 3.4}):
+                             'min_rpm': 3.9}):
 
         logging.debug('Attempting to init Chanogram instance...')
         with open(api_token_file, 'r') as f:
