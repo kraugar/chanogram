@@ -119,6 +119,10 @@ class Chanogram:
                 self.bot.sendMessage(from_id, '''You are *already unsubscribed*.\n_Use_ /start _to subscribe again._''', parse_mode='Markdown')
 
 
+        elif text == '/ping':
+            self.bot.sendMessage(from_id, '''Pong.''')
+
+
         else:
             self.bot.sendMessage(from_id, 'I *only* know the following commands:\n/start _to subscribe,_\n/stop _to unsubscribe._', parse_mode='Markdown')
         logging.debug('Message handled.')
