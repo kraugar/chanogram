@@ -107,14 +107,25 @@ class Chanogram:
 
         if text == '/start':
             if str(from_id) in self.list_get('subscribers'):
-                self.bot.sendMessage(from_id, '''You are *already subscribed*.\n_Use_ /stop _if you want to unsubscribe._''', parse_mode='Markdown')
+                self.bot.sendMessage(from_id,
+                                '''You are *already subscribed*.
+                                _Use_ /stop _if you want to unsubscribe._''',
+                                     parse_mode='Markdown')
             else:
                 self.list_add('subscribers', from_id)
                 if len(self.settings['filter_list']) > 1:
                     plural_handler = 's'
                 else:
                     plural_handler = ''
-                self.bot.sendMessage(from_id, '''You have *subscribed*.\n\nYou will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.\n\nCurrently, a notification is triggered when a thread attracts *more than {1} replies per minute* and does not have the following keyword{2}: "{3}".\n_(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)_\n\n_Use_ /stop _to unsubscribe._'''\
+                self.bot.sendMessage(from_id,
+                '''You have *subscribed*.
+
+                You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
+
+                Currently, a notification is triggered when a thread attracts *more than {1} replies per minute* and does not have the following keyword{2}: "{3}".
+                _(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)_
+
+                _Use_ /stop _to unsubscribe._'''\
                 .format(self.settings['board'],
                         str(self.settings['min_rpm']),
                         plural_handler,
@@ -125,9 +136,15 @@ class Chanogram:
         elif text == '/stop':
             if str(from_id) in self.list_get('subscribers'):
                 self.list_del('subscribers', from_id)
-                self.bot.sendMessage(from_id, '''You have *unsubscribed*.\n_Use_ /start _to subscribe again._''', parse_mode='Markdown')
+                self.bot.sendMessage(from_id,
+                                     '''You have *unsubscribed*.
+                                     _Use_ /start _to subscribe again._''',
+                                     parse_mode='Markdown')
             else:
-                self.bot.sendMessage(from_id, '''You are *already unsubscribed*.\n_Use_ /start _to subscribe again._''', parse_mode='Markdown')
+                self.bot.sendMessage(from_id,
+                                     '''You are *already unsubscribed*.
+                                     _Use_ /start _to subscribe again._''',
+                                     parse_mode='Markdown')
 
 
         elif text == '/ping':
@@ -136,22 +153,29 @@ class Chanogram:
                 logfile = subprocess.check_output('cat chanogram.log',
                                                   shell=True)
                 self.bot.sendMessage(admin_id, logfile)
+                logging.info('Sent {0} line logfile to admin {1}.'\
+                             .format(len(logfile.split('\n'), admin_id)))
             else:
                 self.bot.sendMessage(from_id, '''Pong.''')
 
 
         else:
-            self.bot.sendMessage(from_id, 'I *only* know the following commands:\n/start _to subscribe,_\n/stop _to unsubscribe._', parse_mode='Markdown')
-        logging.debug('Message handled.')
+            self.bot.sendMessage(from_id,
+                                 '''I *only* know the following commands:
+                                 /start _to subscribe,_
+                                 /stop _to unsubscribe._''',
+                                 parse_mode='Markdown')
+        logging.debug('Message handled from {0}: {1}'.format(from_id, msg[:40]))
 
 
     def broadcast(self, msg):
-        logging.debug('Attempting to broadcast message: "{0}"...'.format(msg[:20]))
+        logging.debug('Attempting to broadcast message: "{0}"...'\
+                      .format(msg[:40]))
         subs = self.list_get('subscribers')
         for sub in subs:
             self.bot.sendMessage(sub, msg, parse_mode='Markdown')
         logging.info('Broadcasted message to {0} subscribers: "{1}".'\
-                     .format(len(subs), msg[:20]))
+                     .format(len(subs), msg[:40]))
 
 
     def get_threads(self):
