@@ -132,7 +132,7 @@ class Chanogram:
 
         elif text == '/ping':
             global admin_id
-            if from_d == admin_id:
+            if str(from_id) == admin_id:
                 logfile = subprocess.check_output('cat chanogram.log',
                                                   shell=True)
                 self.bot.sendMessage(admin_id, logfile)
