@@ -108,8 +108,8 @@ class Chanogram:
         if text == '/start':
             if str(from_id) in self.list_get('subscribers'):
                 self.bot.sendMessage(from_id,
-                                '''You are *already subscribed*.
-                                _Use_ /stop _if you want to unsubscribe._''',
+'''You are *already subscribed*.
+_Use_ /stop _if you want to unsubscribe._''',
                                      parse_mode='Markdown')
             else:
                 self.list_add('subscribers', from_id)
@@ -118,14 +118,14 @@ class Chanogram:
                 else:
                     plural_handler = ''
                 self.bot.sendMessage(from_id,
-                '''You have *subscribed*.
+'''You have *subscribed*.
 
-                You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
+You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
 
-                Currently, a notification is triggered when a thread attracts *more than {1} replies per minute* and does not have the following keyword{2}: "{3}".
-                _(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)_
+Currently, a notification is triggered when a thread attracts *more than {1} replies per minute* and does not have the following keyword{2}: "{3}".
+_(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)_
 
-                _Use_ /stop _to unsubscribe._'''\
+_Use_ /stop _to unsubscribe._'''\
                 .format(self.settings['board'],
                         str(self.settings['min_rpm']),
                         plural_handler,
@@ -137,13 +137,13 @@ class Chanogram:
             if str(from_id) in self.list_get('subscribers'):
                 self.list_del('subscribers', from_id)
                 self.bot.sendMessage(from_id,
-                                     '''You have *unsubscribed*.
-                                     _Use_ /start _to subscribe again._''',
+'''You have *unsubscribed*.
+_Use_ /start _to subscribe again._''',
                                      parse_mode='Markdown')
             else:
                 self.bot.sendMessage(from_id,
-                                     '''You are *already unsubscribed*.
-                                     _Use_ /start _to subscribe again._''',
+'''You are *already unsubscribed*.
+_Use_ /start _to subscribe again._''',
                                      parse_mode='Markdown')
 
 
@@ -161,9 +161,10 @@ class Chanogram:
 
         else:
             self.bot.sendMessage(from_id,
-                                 '''I *only* know the following commands:
-                                 /start _to subscribe,_
-                                 /stop _to unsubscribe._''',
+'''I *only* know the following commands:
+/start _to subscribe,_
+/stop _to unsubscribe._
+/ping _to receive a pong.''',
                                  parse_mode='Markdown')
         logging.debug('Message handled from {0}: {1}'.format(from_id, msg[:40]))
 
