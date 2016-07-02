@@ -94,25 +94,68 @@ class Chanogram:
 
     def handle_input(self, msg):
         global admin_id
-        from_id = msg['from']['id']
+        from_id = str(msg['from']['id'])
         text = msg['text']
         logging.debug('Attempting to handle message from {0}: "{1}"...'\
                       .format(from_id, text[:20]))
 
 
         if text == '/start':
-            if str(from_id) in self.list_get('subscribers'):
-                self.bot.sendMessage(from_id,
-'''You are *already subscribed*.
-_Use_ /stop _if you want to unsubscribe._''',
-                                     parse_mode='Markdown')
+            self._start(from_id)
+
+
+        elif text == '/stop':
+            self._stop(from_id)
+
+
+        elif text == '/ping':
+            self.bot.sendMessage(from_id, '''Pong.''')
+
+        elif text == '/log' and from_id == admin_id:
+            self._log(admin_id)
+
+        elif text == '/debug' and from_id == admin_id:
+            self._debug(admin_id)
+
+        elif text == '/subs' and from_id == admin_id:
+            self._subs(admin_id)
+
+
+        else:
+            if from_id == admin_id:
+                reply =\
+'''These are all available commands including your admin commands:
+/start to _subscribe,_
+/stop to _unsubscribe,_
+/ping to _receive a pong_,
+/log to _receive the latest logging entries_,
+/subs to _receive a list of subscribers_.'''
             else:
-                self.list_add('subscribers', from_id)
-                if len(self.settings['filter_list']) > 1:
-                    plural_handler = 's'
-                else:
-                    plural_handler = ''
-                self.bot.sendMessage(from_id,
+                reply =\
+'''I *only* know the following commands:
+/start to _subscribe,_
+/stop to _unsubscribe,_
+/ping to _receive a pong_.'''
+                self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
+
+        logging.debug('Message handled from {0}: {1}'\
+                      .format(from_id, text[:40]))
+
+
+    def _start(self, from_id):
+        if str(from_id) in self.list_get('subscribers'):
+            reply = \
+'''You are *already subscribed*.
+_Use_ /stop _if you want to unsubscribe._'''
+            self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
+
+        else:
+            self.list_add('subscribers', from_id)
+            if len(self.settings['filter_list']) > 1:
+                plural_handler = 's'
+            else:
+                plural_handler = ''
+            reply = \
 '''You have *subscribed*.
 
 You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
@@ -124,48 +167,60 @@ _Use_ /stop _to unsubscribe._'''\
                 .format(self.settings['board'],
                         str(self.settings['min_rpm']),
                         plural_handler,
-                        ', '.join(self.settings['filter_list'])),
-                parse_mode='Markdown')
-                logging.info('User with ID {0} subscribed.'.format(from_id))
+                        ', '.join(self.settings['filter_list']))
+            self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
+            logging.info('User with ID {0} subscribed.'.format(from_id))
 
 
-        elif text == '/stop':
-            if str(from_id) in self.list_get('subscribers'):
-                self.list_del('subscribers', from_id)
-                self.bot.sendMessage(from_id,
+    def _stop(self, from_id):
+        if str(from_id) in self.list_get('subscribers'):
+            self.list_del('subscribers', from_id)
+            self.bot.sendMessage(from_id,
 '''You have *unsubscribed*.
 _Use_ /start _to subscribe again._''',
-                                     parse_mode='Markdown')
-                logging.info('User with ID {0} unsubscribed.'.format(from_id))
-            else:
-                self.bot.sendMessage(from_id,
-'''You are *already unsubscribed*.
-_Use_ /start _to subscribe again._''',
-                                     parse_mode='Markdown')
-
-
-        elif text == '/ping':
-                self.bot.sendMessage(from_id, '''Pong.''')
-
-
-        elif text == '/log' and from_id == admin_id:
-            logtail= subprocess.check_output('tail chanogram.log',
-                                             shell=True)
-            self.bot.sendMessage(admin_id,
-                                 '```{0}```'.format(logtail),
                                  parse_mode='Markdown')
-            logging.debug('Sent {0} line logtail to admin with ID {1}.'\
-                          .format(len(logtail.split('\n')), admin_id))
-
+            logging.info('User with ID {0} unsubscribed.'.format(from_id))
 
         else:
             self.bot.sendMessage(from_id,
-'''I *only* know the following commands:
-/start _to subscribe,_
-/stop _to unsubscribe._
-/ping _to receive a pong.''',
+'''You are *already unsubscribed*.
+_Use_ /start _to subscribe again._''',
                                  parse_mode='Markdown')
-        logging.debug('Message handled from {0}: {1}'.format(from_id, msg[:40]))
+
+
+    def _log(self, admin_id):
+        loglevel = logging.getLogger().getEffectiveLevel()
+        if loglevel == 10:
+            lines = 100
+        else:
+            lines = 20
+        logtail = subprocess.check_output('tail -n {0} chanogram.log'\
+                                          .format(lines),
+                                          shell=True)
+        self.bot.sendMessage(admin_id, logtail[-4000:].replace('\n','\n\n'))
+        logging.debug(\
+                      'Sent logtail to admin with ID {0}.'\
+                      .format(admin_id))
+
+
+    def _debug(self, admin_id):
+        logging.getLogger().setLevel(logging.DEBUG)
+        reply =\
+'DEBUG MODE ENABLED for up to 30 seconds. Use /log to check the output.'
+        self.bot.sendMessage(admin_id, reply)
+
+
+    def _subs(self, admin_id):
+        subs = self.list_get('subscribers')
+        if len(subs) > 1:
+            plural_handler = '''Currently there are {0} subscribers:\n{1}'''
+        else:
+            plural_handler = '''Currently there is one subscriber: {1}'''
+        reply = plural_handler.format(len(subs), '\n-'.join(subs))
+        self.bot.sendMessage(admin_id, reply, parse_mode='Markdown')
+        logging.debug(\
+            'Sent subscribers list with {0} entries to admin with ID {1}.'\
+            .format(len(subs), admin_id))
 
 
     def broadcast(self, msg):
@@ -289,7 +344,7 @@ _Use_ /start _to subscribe again._''',
             else:
                 percentage = "%.1f" % (t['rpm'] * 100 /
                                        self.settings['min_rpm'])
-                logging.debug('No hot threads, closest at {0}/min ({1}%): "{2}"'.format(t['rpm'], percentage, t['text'][:30]))
+                logging.debug('No threads matching requirements, closest at {0}/min ({1}%): "{2}"'.format(t['rpm'], percentage, t['text'][:30]))
             logging.debug('Check operation complete.')
         except exceptions.Exception as e:
             print e
@@ -300,3 +355,4 @@ c = Chanogram()
 while True:
     c.run()
     time.sleep(30)
+    logging.getLogger().setLevel(logging.INFO)
