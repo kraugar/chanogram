@@ -2,6 +2,7 @@ import json
 import sqlite3
 import telepot
 import time
+import subprocess
 import logging
 import exceptions
 from dateutil.relativedelta import relativedelta
@@ -9,6 +10,9 @@ from BeautifulSoup import BeautifulSoup
 from HTMLParser import HTMLParser
 from datetime import datetime
 from urllib2 import urlopen
+
+with open('admin_id') as f:
+    admin_id = f.read()
 
 logging.basicConfig(filename='chanogram.log',
                     level=logging.INFO,
@@ -42,6 +46,13 @@ class Chanogram:
         self.conn.close()
 
         self.settings = settings
+
+        last_commit = subprocess.check_output('git log -1', shell=True)
+        global admin_id
+        self.bot.sendMessage(admin_id,
+                             '*Deployed with last update*:\n{0}'\
+                             .format(last_commit),
+                             parse_mode='Markdown')
         logging.info('Chanogram instance init complete.')
 
 
