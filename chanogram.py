@@ -15,7 +15,7 @@ with open('admin_id') as f:
     admin_id = f.read()
 
 logging.basicConfig(filename='chanogram.log',
-                    level=logging.INFO,
+                    level=logging.DEBUG,
                     filemode='w',
                     format='%(asctime)s %(levelname)s %(message)s')
 
@@ -50,9 +50,8 @@ class Chanogram:
         last_commit = subprocess.check_output('git log -1', shell=True)
         global admin_id
         self.bot.sendMessage(admin_id,
-                             '*Deployed with last update*:\n{0}'\
-                             .format(last_commit),
-                             parse_mode='Markdown')
+                             'Deployed with last update:\n{0}'\
+                             .format(last_commit))
         logging.info('Chanogram instance init complete.')
 
 
