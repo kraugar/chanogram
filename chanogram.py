@@ -65,10 +65,7 @@ class Chanogram:
         "INSERT OR IGNORE INTO {0} VALUES ('{1}')".format(list_name, entry))
         self.conn.commit()
         self.conn.close()
-        if list_name == 'subscribers':
-            logging.info('New subscriber with ID {0}'.format(entry))
-        else:
-            logging.debug('Added {0} to list {1}.'.format(entry, list_name))
+        logging.debug('Added {0} to list {1}.'.format(entry, list_name))
 
 
     def list_del(self, list_name, entry):
@@ -80,10 +77,7 @@ class Chanogram:
         "DELETE FROM {0} WHERE entry='{1}'".format(list_name, entry))
         self.conn.commit()
         self.conn.close()
-        if list_name == 'subscribers':
-            logging.info('User with ID {0} unsubscribed.'.format(entry))
-        else:
-            logging.debug('Deleted {0} from list {1}.'.format(entry, list_name))
+        logging.debug('Deleted {0} from list {1}.'.format(entry, list_name))
 
 
     def list_get(self, list_name):
@@ -131,6 +125,7 @@ _Use_ /stop _to unsubscribe._'''\
                         plural_handler,
                         ', '.join(self.settings['filter_list'])),
                 parse_mode='Markdown')
+                logging.info('User {0} subscribed.'.format(from_id))
 
 
         elif text == '/stop':
@@ -140,6 +135,7 @@ _Use_ /stop _to unsubscribe._'''\
 '''You have *unsubscribed*.
 _Use_ /start _to subscribe again._''',
                                      parse_mode='Markdown')
+                logging.info('User {0} unsubscribed.'.format(from_id))
             else:
                 self.bot.sendMessage(from_id,
 '''You are *already unsubscribed*.
