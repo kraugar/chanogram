@@ -150,7 +150,7 @@ _Use_ /start _to subscribe again._''',
                                                   shell=True)
                 self.bot.sendMessage(admin_id, logfile)
                 logging.info('Sent {0} line logfile to admin {1}.'\
-                             .format(len(logfile.split('\n'), admin_id)))
+                             .format(len(logfile.split('\n')), admin_id))
             else:
                 self.bot.sendMessage(from_id, '''Pong.''')
 
