@@ -1,4 +1,4 @@
-بــــــــــاســـــــــــم الآب والابــــــــــن والـــــــــــرّوح الــــــــــقــــــــــدـس
+ بــــــــــاســـــــــــم الآب والابــــــــــن والـــــــــــرّوح الــــــــــقــــــــــدـس
 
-# Evangelion
-a notification system for breaking news threads on 4chan
+# Chanogram
+a Telegram 4chan notification bot
