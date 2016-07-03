@@ -129,6 +129,7 @@ class Chanogram:
 /ping to _receive a pong_,
 /log to _receive the latest logging entries_,
 /subs to _receive a list of subscribers_.'''
+                self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
             else:
                 reply =\
 '''I *only* know the following commands:
