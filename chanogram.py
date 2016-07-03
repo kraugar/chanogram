@@ -25,7 +25,7 @@ class Chanogram:
                  db_file = 'chanogram.db',
                  settings = {'board': 'pol',
                              'filter_list': ['edition',],
-                             'min_replies': 0,
+                             'min_replies': 50,
                              'min_rpm': 3.9}):
 
         logging.debug('Attempting to init Chanogram instance...')
