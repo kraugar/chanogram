@@ -24,7 +24,7 @@ class Chanogram:
                  api_token_file = 'api_token.txt',
                  db_file = 'chanogram.db',
                  settings = {'board': 'pol',
-                             'filter_list': ['edition',],
+                             'filter_list': ['edition', 'thread'],
                              'min_replies': 100,
                              'min_rpm': 4.4}):
 
