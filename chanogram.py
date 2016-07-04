@@ -160,7 +160,7 @@ _Use_ /stop _if you want to unsubscribe._'''
 
 You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
 
-Currently, a notification is triggered when a thread attracts *more than {1} replies per minute*, has *at least {2} replies* and does not have the following keyword{3}: "{4}".
+Currently, a notification is triggered when a thread attracts *more than {1} replies per minute*, has *at least {2} replies* and does not have the following keyword{3}: {4}.
 _(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)_
 
 _Use_ /stop _to unsubscribe._'''\
@@ -168,7 +168,7 @@ _Use_ /stop _to unsubscribe._'''\
                         str(self.settings['min_rpm']),
                         str(self.settings['min_replies']),
                         plural_handler,
-                        ', '.join(self.settings['filter_list']))
+                        '; '.join(self.settings['filter_list']))
             self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
             logging.info('User with ID {0} subscribed.'.format(from_id))
 
