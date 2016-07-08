@@ -23,7 +23,7 @@ thread
 (from United States)
 http://boards.4chan.org/pol/thread/12345678
 ```
-6. And sends it to **all subscribers** (including groups/supergroups)
+And sends it to **all subscribers** (including groups/supergroups)!
 
 ## How to get it to work yourself
 1. You need to be able to run a **Python script** for as long as the bot should work, so preferably a **server** or some computer that runs **24/7**. You will need to install some packages, such as `telepot`. You can do this via `pip install telepot`.
