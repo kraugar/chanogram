@@ -110,6 +110,7 @@ class Chanogram:
 
 
     def handle_input(self, msg):
+        print(msg)
         global admin_id
         if msg['chat']['type'] == 'group':
             from_id = msg['chat']['id']
