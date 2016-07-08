@@ -11,14 +11,13 @@ Telegram 4chan breaking news notification bot
 5. ...**formats** the thread into a message that looks like this:
 ```
 11.3/min (613r in 54min)
-<
-...
 content
-of
-the
-thread
 ...
->
+of
+...
+the
+...
+thread
 (from United States)
 http://boards.4chan.org/pol/thread/12345678
 ```
