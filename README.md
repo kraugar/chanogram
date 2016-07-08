@@ -3,7 +3,7 @@
 # Chanogram
 Telegram 4chan breaking news notification bot
 
-Currently running at `@polbrknws_bot`.
+Currently running at [@polbrknws_bot](https://telegram.me/polbrknws_bot).
 
 ## How it works
 1. Grabs the **4chan API file** for a board (default `/pol/`)
