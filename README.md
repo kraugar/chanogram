@@ -31,7 +31,9 @@ http://boards.4chan.org/pol/thread/12345678
    1. starting the bot
    2. sending it a message (you get the username from the BotFather)
    3. checking the `logs/chanogram-debug.log` file and looking for a line `DEBUG - Attempting to handle message from <ID>`.
-5. Once the bot is running, add it to a group (or open a private chat if you just want to subscribe yourself) as write `/start`.
+5. Create the **folder** `logs` (in the directory of `chanogram.py`).
+6. **Start the script** `python3 chanogram.py` or `python3 chanogram.py &` to run as a daemon allowing you to close the terminal again.
+7. Once the bot is running, add it to a group (or open a private chat if you just want to subscribe yourself) as write `/start`.
 
 ## Thanks
 This bot is based on the great [telepot](https://github.com/nickoala/telepot) package.
