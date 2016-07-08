@@ -148,23 +148,27 @@ class Chanogram:
 
 
         else:
-            if from_id == admin_id:
-                reply =\
+            if msg['chat']['type'] == 'group'\
+             or msg['chat']['type'] == 'supergroup':
+                pass
+            else:
+                if from_id == admin_id:
+                    reply =\
 '''These are all available commands including your admin commands:
 /start to _subscribe,_
 /stop to _unsubscribe,_
 /ping to _receive a pong_,
 /log to _receive the latest logging entries_,
 /subs to _receive a list of subscribers_.'''
-                self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
-            else:
-                reply =\
+                    self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
+                else:
+                    reply =\
 '''I *only* know the following commands:
 /start to _subscribe,_
 /stop to _unsubscribe,_
 /top to receive _most popular thread right now_,
 /ping to _receive a pong_.'''
-                self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
+                    self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
 
         logger.debug('Message handled from {0}: {1}'\
                       .format(from_id, text[:40]))
