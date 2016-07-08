@@ -7,11 +7,18 @@ Telegram 4chan breaking news notification bot
 1. Grabs the **4chan API file** for a board (default `/pol/`)
 2. **Filters** threads **already notified**
 3. **Filters** threads whose title **contains certain words** (default: `edition` and `thread`)
-4. Checks if the message has at least `4.4` **replies per minute** (default) and at least `100` **total replies** (default), if no, stops, if yes, ...
-5. ...**formats** the message into something like this:
+4. Checks if the thread has at least `4.4` **replies per minute** (default) and at least `100` **total replies** (default), if no, stops, if yes, ...
+5. ...**formats** the thread into a message that looks like this:
 ```
 11.3/min (613r in 54min)
-<the content of the post>
+<
+...
+content
+of
+the
+thread
+...
+>
 (from United States)
 http://boards.4chan.org/pol/thread/12345678
 ```
