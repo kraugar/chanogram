@@ -55,11 +55,14 @@ class Chanogram:
         self.c.execute(\
         "CREATE TABLE IF NOT EXISTS subscribers (entry TEXT UNIQUE)")
         self.c.execute(\
+        "CREATE TABLE IF NOT EXISTS groups (entry TEXT UNIQUE)")
+        self.c.execute(\
         "CREATE TABLE IF NOT EXISTS broadcast_history (entry TEXT UNIQUE)")
         self.conn.commit()
         self.conn.close()
 
         self.settings = settings
+        self.latest = 'No latest thread yet, wait a bit and try again.'
 
         last_commit = subprocess.check_output('git log -1', shell=True)
         global admin_id
@@ -110,22 +113,26 @@ class Chanogram:
 
     def handle_input(self, msg):
         global admin_id
-        from_id = str(msg['from']['id'])
+        if msg['chat']['type'] == 'group':
+            from_id = msg['chat']['id']
+        else:
+            from_id = str(msg['from']['id'])
         text = msg['text']
         logger.debug('Attempting to handle message from {0}: "{1}"...'\
                       .format(from_id, text[:20]))
 
 
         if text == '/start':
-            self._start(from_id)
-
+                self._start(from_id)
 
         elif text == '/stop':
             self._stop(from_id)
 
-
         elif text == '/ping':
             self.bot.sendMessage(from_id, '''Pong.''')
+
+        elif text == '/top':
+            self._top(from_id)
 
         elif text == '/log' and from_id == admin_id:
             self._log(admin_id)
@@ -156,6 +163,7 @@ class Chanogram:
 '''I *only* know the following commands:
 /start to _subscribe,_
 /stop to _unsubscribe,_
+/top to receive _most popular thread right now_,
 /ping to _receive a pong_.'''
                 self.bot.sendMessage(from_id, reply, parse_mode='Markdown')
 
@@ -211,6 +219,12 @@ _Use_ /start _to subscribe again._''',
 _Use_ /start _to subscribe again._''',
                                  parse_mode='Markdown')
 
+    def _top(self, from_id):
+        try:
+            self.bot.sendMessage(from_id, self.latest)
+            logger.info('Sent latest to {0}.'.format(from_id))
+        except:
+            logger.error('Error sending latest to {0}.'.format(from_id))
 
     def _log(self, admin_id):
         logtail = subprocess.check_output('tail -n 50 logs/chanogram-debug.log',
@@ -243,6 +257,7 @@ _Use_ /start _to subscribe again._''',
         for sub in subs:
             try:
                 self.bot.sendMessage(sub, msg, parse_mode='Markdown')
+                self.latest = msg
             except Exception as e:
                 logger.error('Failed to send message to {0}, '
                              'got this error: {1}'.format(sub, e))
