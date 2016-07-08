@@ -3,6 +3,8 @@
 # Chanogram
 Telegram 4chan breaking news notification bot
 
+Currently running at `@xspolbrknws_bot`.
+
 ## How it works
 1. Grabs the **4chan API file** for a board (default `/pol/`)
 2. **Filters** threads **already notified**
