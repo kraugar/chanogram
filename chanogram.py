@@ -259,8 +259,12 @@ _Use_ /start _to subscribe again._''',
         subs = self.list_get('subscribers')
         for sub in subs:
             try:
-                self.bot.sendMessage(sub, msg, parse_mode='Markdown')
-                self.latest = msg
+                try:
+                    self.bot.sendMessage(sub, msg, parse_mode='Markdown')
+                    self.latest = msg
+                except:
+                    self.bot.sendMessage(sub, msg)
+                    self.latest = msg
             except Exception as e:
                 logger.error('Failed to send message to {0}, '
                              'got this error: {1}'.format(sub, e))
