@@ -26,3 +26,7 @@ http://boards.4chan.org/pol/thread/12345678
    2. sending it a message (you get the username from the BotFather)
    3. checking the `logs/chanogram-debug.log` file and looking for a line `DEBUG - Attempting to handle message from <ID>`.
 5. Once the bot is running, add it to a group (or open a private chat if you just want to subscribe yourself) as write `/start`.
+
+## Thanks
+This bot is based on the great [telepot](https://github.com/nickoala/telepot) package.
+Thanks also to the creators of the other Python packages used.
