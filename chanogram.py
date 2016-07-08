@@ -10,7 +10,6 @@ from BeautifulSoup import BeautifulSoup
 from HTMLParser import HTMLParser
 from datetime import datetime
 from urllib2 import urlopen
-
 with open('admin_id') as f:
     admin_id = f.read()
 
@@ -25,7 +24,7 @@ fhi = logging.handlers.TimedRotatingFileHandler(\
 ch = logging.StreamHandler()
 fhd.setLevel(logging.DEBUG)
 fhd.setFormatter(formatter)
-fhi.setLevel(logging.DEBUG)
+fhi.setLevel(logging.INFO)
 fhi.setFormatter(formatter)
 ch.setLevel(logging.DEBUG)
 ch.setFormatter(formatter)
@@ -242,7 +241,11 @@ _Use_ /start _to subscribe again._''',
     def broadcast(self, msg):
         subs = self.list_get('subscribers')
         for sub in subs:
-            self.bot.sendMessage(sub, msg, parse_mode='Markdown')
+            try:
+                self.bot.sendMessage(sub, msg, parse_mode='Markdown')
+            except Exception as e:
+                logger.error('Failed to send message to {0}, '
+                             'got this error: {1}'.format(sub, e))
         logger.info('BROADCASTED message to {0} subscribers: "{1}".'\
                      .format(len(subs), msg[:40]))
 
