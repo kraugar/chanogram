@@ -55,8 +55,6 @@ class Chanogram:
         self.c.execute(\
         "CREATE TABLE IF NOT EXISTS subscribers (entry TEXT UNIQUE)")
         self.c.execute(\
-        "CREATE TABLE IF NOT EXISTS groups (entry TEXT UNIQUE)")
-        self.c.execute(\
         "CREATE TABLE IF NOT EXISTS broadcast_history (entry TEXT UNIQUE)")
         self.conn.commit()
         self.conn.close()
