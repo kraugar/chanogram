@@ -32,7 +32,7 @@ And sends it to **all subscribers** (including groups/supergroups)!
 4. Create a file `admin_id` and **insert your personal Telegram ID** in there to get additional functionality (logs, list of subscribers, manual broadcast, etc.) You can get this number by
    1. starting the bot
    2. sending it a message (you get the username from the BotFather)
-   3. checking the `logs/chanogram-debug.log` file and looking for a line `DEBUG - Attempting to handle message from <ID>`.
+   3. checking the `chanogram.log` file and looking for a line `DEBUG - Attempting to handle message from <ID>`.
 5. **Start the script** `python3 chanogram.py` or `python3 chanogram.py &` to run as a daemon allowing you to close the terminal again.
 6. Once the bot is running, add it to a group (or open a private chat if you just want to subscribe yourself) as write `/start`.
 
