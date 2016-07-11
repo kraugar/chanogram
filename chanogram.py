@@ -95,7 +95,7 @@ class Chanogram:
                 if msg['chat']['type'] not in ['group', 'supergroup']:
                     self.bot.sendMessage(
                         from_id,
-                        get_msg('commands_admin') if from_id is self.admin_id
+                        get_msg('commands_admin') if from_id == self.admin_id
                         else get_msg('commands_nonadmin'),
                         parse_mode='Markdown')
             self.logger.debug('Message handled from {0}: {1}'\
