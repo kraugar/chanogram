@@ -40,14 +40,6 @@ def _log(self, admin_id):
     logtail = subprocess.check_output('tail -n 50 chanogram.log',
                                      shell=True)
     self.bot.sendMessage(admin_id, logtail[-4000:].replace('\n','\n\n'))
-    time.sleep(0.5)
-    brd = subprocess.check_output('grep Broadcasted chanogram.log',
-                                      shell=True)
-    self.bot.sendMessage(admin_id, brd[-4000:].replace('\n','\n\n'))
-    time.sleep(0.5)
-    err = subprocess.check_output('grep ERROR chanogram.log',
-                                      shell=True)
-    self.bot.sendMessage(admin_id, err[-4000:].replace('\n','\n\n'))
 
 def _subs(self, admin_id):
     subs = [sub['from_id'] for sub in self.db['subscribers'].all()]
