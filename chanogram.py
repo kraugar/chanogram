@@ -183,6 +183,11 @@ class Chanogram:
             self.logger.error('Check operation failed with error: {0}'
                               .format(e))
 
+    def get_msg(msg):
+        with open('messages/{0}'.format(msg), 'r') as f:
+            msg = f.read()
+        return msg
+
 
 c = Chanogram()
 while True:

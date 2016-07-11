@@ -2,11 +2,6 @@ import arrow
 import subprocess
 import time
 
-def get_msg(msg):
-    with open('messages/{0}'.format(msg), 'r') as f:
-        msg = f.read()
-        return msg
-
 def _start(self, from_id):
     if from_id in [sub['from_id'] for sub in self.db['subscribers'].all()]:
         reply = get_msg('already_subscribed')
