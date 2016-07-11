@@ -5,6 +5,7 @@ import time, arrow
 import exceptions, traceback
 import subprocess
 import logging, logging.handlers
+from urllib2 import urlopen
 from commands import _start, _stop, _log, _subs, _yell
 from chanapi import Board
 
@@ -15,8 +16,8 @@ class Chanogram:
                  settings = {'db_file': 'sqlite:///chanogram.db',
                              'board': 'pol',
                              'filter_list': ['edition', 'thread'],
-                             'min_replies': 0,
-                             'min_rpm': 0}):
+                             'min_replies': 150,
+                             'min_rpm': 5.0}):
 
         with open(admin_id_file, 'r') as f:
             self.admin_id = f.read()
@@ -113,6 +114,7 @@ class Chanogram:
                     self.latest = msg
                     successes += 1
             except Exception as e:
+                e = traceback.format_exc()
                 self.logger.error('Failed to send message to {0}, '
                                   'got this error: {1}'.format(sub, e))
                 failures += 1
@@ -122,27 +124,54 @@ class Chanogram:
                     failures,
                     msg[:100].replace('\n', ' // ')))
 
+    def broadcast_photo(self, photo, ext, caption):
+        subs = [sub['from_id'] for sub in self.db['subscribers'].all()]
+        tpl = ('photo{0}'.format(ext), photo)
+        successes = 0
+        failures = 0
+        for sub in subs:
+            try:
+                self.bot.sendPhoto(sub, tpl, caption=caption)
+                successes += 1
+            except Exception as e:
+                e = traceback.format_exc()
+                failures += 1
+                self.logger.error('Failed to send message to {0}, '
+                                  'got this error: {1}'.format(sub, e))
+        self.logger.info(
+            'Broadcasted photo to {0} subscribers ({1} failed): "{2}".'
+            .format(successes,
+                    failures,
+                    caption[:100]))
+
 
     def run(self):
         try:
             self.logger.debug('Attempting a check operation...')
+            try:
+                history = [h['no'] for h in self.db['history'].all()]
+            except Exception as e:
+                e = traceback.format_exc()
+                self.logger.debug(e)
+                history = []
             b = Board(board = self.settings['board'],
-                              filter_list = self.settings['filter_list'],
-                              sort='rpm',
-                              reverse=True,
-                              logger=self.logger)
+                      filter_list = self.settings['filter_list'],
+                      history=history,
+                      sort='rpm',
+                      reverse=True,
+                      logger=self.logger)
             t = b.threads[0]
 
             if (float(t['replies']) > self.settings['min_replies']
                 and t['rpm'] > self.settings['min_rpm']):
                 self.broadcast(t['formatted'])
                 now = arrow.now().format('YYYY-MM-DD HH:mm:ss')
-                self.db['history'].insert(dict(no=t['no'], time=now))
+                self.db['history'].insert(dict(no=str(t['no']), time=now))
             else:
                 perc_rpm = "%.1f" % (t['rpm'] * 100 / self.settings['min_rpm'])
                 perc_replies = (int(t['replies']) * 100 /
                                 int(self.settings['min_replies']))
-                logger.debug('No threads matching requirements, '
+                self.logger.debug('No threads matching requirements, '
                              'closest at {0}/min ({1}%) with {2} posts ({3}%)'
                              ': "{4}"'\
                              .format(t['rpm'], perc_rpm,

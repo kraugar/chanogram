@@ -9,11 +9,13 @@ class Board:
     def __init__(self,
                  board='pol',
                  filter_list=[],
+                 history=[],
                  sort='rpm',
                  reverse=True,
                  logger=None):
         self.board = board
         self.filter_list = filter_list
+        self.history=history
         self.sort = sort
         self.reverse = reverse
         self.logger = logger
@@ -40,16 +42,13 @@ class Board:
 
 
     def remove_read_threads(self):
-        try:
-            history = [h['no'] for h in self.db['history'].all()]
-        except:
-            history = []
-        unread = [t for t in self.threads if t['no'] not in history]
+        if self.history:
+            unread = [t for t in self.threads if t['no'] not in self.history]
 
-        if self.logger:
-            self.logger.debug('Removed {0} threads already broadcasted.'
-                              .format(len(self.threads) - len(unread)))
-        self.threads = unread
+            if self.logger:
+                self.logger.debug('Removed {0} threads already broadcasted.'
+                                  .format(len(self.threads) - len(unread)))
+            self.threads = unread
 
 
     def filter_threads(self):
@@ -115,11 +114,19 @@ class Board:
                                         float(thread['age_s'])))
         ###################
 
+
+        if thread['filename'] and thread['ext'] in ['.jpg', '.png']:
+            thread['imgurl'] = ('https://i.4cdn.org/{0}/{1}{2}'
+                                .format(thread['board'],
+                                        thread['tim'],
+                                        thread['ext']))
+
         thread['formatted'] =(
-            '*{0}/min ({1}r in {2})*\n{3}\n\n(from {4})\n{5}'
+            '*{0}/min ({1}r in {2})*\n{3}\n\n{4}\n\n(from {5})\n{6}'
             .format(thread['rpm'],
                     thread['replies'],
                     thread['age_hm'],
+                    thread['imgurl'] if 'imgurl' in thread else '',
                     thread['text'],
                     thread['country_name'],
                     thread['url']))
