@@ -1,0 +1,11 @@
+You have *subscribed*.
+
+You will receive a *notification* if a *thread* on 4chan's /{0}/ board is attracting *lots of responses in a short time*.
+
+Currently, a notification is triggered when a thread:
+1. attracts more than *{1} replies per minute*,
+2. has at least *{2} total replies* and
+3. does not have the following keyword{3} in the subject: *{4}*
+_(since those threads usually aren't related to breaking news but attract lots of replies per minute because of regular posters)._
+
+_Use_ /stop _to unsubscribe._

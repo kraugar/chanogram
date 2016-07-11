@@ -1,0 +1,7 @@
+These are all available commands including your admin commands:
+/start to _subscribe,_
+/stop to _unsubscribe,_
+/ping to _receive a pong_,
+/log to _receive the latest logging entries_,
+/subs to _receive a list of subscribers_,
+/yell <msg> to _send a custom message to all of them_.
