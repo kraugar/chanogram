@@ -49,7 +49,7 @@ def _log(self, admin_id):
     brd = subprocess.check_output('grep Broadcasted chanogram.log',
                                       shell=True)
     self.bot.sendMessage(admin_id, brd[-4000:].replace('\n','\n\n'))
-        time.sleep(0.5)
+    time.sleep(0.5)
     err = subprocess.check_output('grep ERROR chanogram.log',
                                       shell=True)
     self.bot.sendMessage(admin_id, err[-4000:].replace('\n','\n\n'))
