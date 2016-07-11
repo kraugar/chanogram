@@ -9,6 +9,12 @@ from urllib2 import urlopen
 from commands import _start, _stop, _log, _subs, _yell
 from chanapi import Board
 
+
+def get_msg(msg):
+    with open('messages/{0}'.format(msg), 'r') as f:
+        msg = f.read()
+        return msg
+
 class Chanogram:
     def __init__(self,
                  api_token_file = 'api_token',
@@ -182,11 +188,6 @@ class Chanogram:
             e = traceback.format_exc()
             self.logger.error('Check operation failed with error: {0}'
                               .format(e))
-
-    def get_msg(msg):
-        with open('messages/{0}'.format(msg), 'r') as f:
-            msg = f.read()
-        return msg
 
 
 c = Chanogram()
