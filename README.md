@@ -9,7 +9,7 @@ Currently running at [@polbrknws_bot](https://telegram.me/polbrknws_bot).
 1. Grabs the **4chan API file** for a board (default `/pol/`)
 2. **Filters** threads **already notified**
 3. **Filters** threads whose title **contains certain words** (default: `edition` and `thread`)
-4. Checks if the thread has at least `4.4` **replies per minute** (default) and at least `100` **total replies** (default), if no, stops, if yes, ...
+4. Checks if the thread has at least `5.0` **replies per minute** (default) and at least `150` **total replies** (default), if no, stops, if yes, ...
 5. ...**formats** the thread into a message that looks like this:
 ```
 11.3/min (613r in 54min)
