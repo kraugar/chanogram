@@ -44,7 +44,7 @@ class Chanogram:
         fh = logging.handlers.TimedRotatingFileHandler(\
                         'chanogram.log', when='H',interval=24,backupCount=7)
         ch = logging.StreamHandler()
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(logging.INFO)
         fh.setFormatter(formatter)
         ch.setLevel(logging.DEBUG)
         ch.setFormatter(formatter)
