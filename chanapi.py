@@ -115,11 +115,12 @@ class Board:
         ###################
 
 
-        if thread['filename'] and thread['ext'] in ['.jpg', '.png']:
-            thread['imgurl'] = ('https://i.4cdn.org/{0}/{1}{2}'
-                                .format(thread['board'],
-                                        thread['tim'],
-                                        thread['ext']))
+        if 'filename' in thread:
+            if thread['ext'] in ['.jpg', '.png']:
+                thread['imgurl'] = ('https://i.4cdn.org/{0}/{1}{2}'
+                                    .format(thread['board'],
+                                            thread['tim'],
+                                            thread['ext']))
 
         thread['formatted'] =(
             '*{0}/min ({1}r in {2})*\n{3}\n\n{4}\n\n(from {5})\n{6}'
