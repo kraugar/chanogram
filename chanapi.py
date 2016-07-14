@@ -110,8 +110,11 @@ class Board:
         ###################
 
         # rpm #############
-        thread['rpm'] = float("%.1f" % (float(thread['replies']) * 60/
-                                        float(thread['age_s'])))
+        if thread['age_s'] is not 0:
+            thread['rpm'] = float("%.1f" % (float(thread['replies']) * 60/
+                                            float(thread['age_s'])))
+        else:
+            thread['rpm'] = 0
         ###################
 
 
