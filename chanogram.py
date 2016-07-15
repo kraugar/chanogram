@@ -21,7 +21,10 @@ class Chanogram:
                  admin_id_file = 'admin_id',
                  settings = {'db_file': 'sqlite:///chanogram.db',
                              'board': 'pol',
-                             'filter_list': ['edition', 'thread', 'brit/pol/'],
+                             'filter_list': ['edition',
+                                             'thread',
+                                             'brit/pol/',
+                                             'general'],
                              'min_replies': 150,
                              'min_rpm': 5.0}):
 
